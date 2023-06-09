@@ -100,18 +100,18 @@ controller_server:
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
-      max_vel_x: 2.0
+      max_vel_x: 1.0
       max_vel_y: 0.0
       max_vel_theta: 4.0
       min_speed_xy: 0.0
-      max_speed_xy: 2.0
+      max_speed_xy: 1.0
       min_speed_theta: 0.0
-      acc_lim_x: 20.0
+      acc_lim_x: 10.0
       acc_lim_y: 0.0
-      acc_lim_theta: 25.0
-      decel_lim_x: -20.0
+      acc_lim_theta: 10.0
+      decel_lim_x: -10.0
       decel_lim_y: 0.0
-      decel_lim_theta: -25.0
+      decel_lim_theta: -10.0
       vx_samples: 20
       vy_samples: 5
       vtheta_samples: 20
@@ -186,7 +186,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       use_sim_time: True
-      footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
+      footprint: "[ [0.254, 0.2159], [0.254, -0.2159], [-0.254, -0.2159], [-0.254, 0.2159] ]"
       resolution: 0.06
       track_unknown_space: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -282,8 +282,8 @@ velocity_smoother:
     feedback: "OPEN_LOOP"
     max_velocity: [1.0, 0.0, 1.0]
     min_velocity: [-1.0, 0.0, -1.0]
-    max_accel: [0.5, 0.0, 0.5]
-    max_decel: [-0.5, 0.0, -0.5]
+    max_accel: [10.0, 0.0, 10.0]
+    max_decel: [-10.0, 0.0, -10.0]
     odom_topic: "odom"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
