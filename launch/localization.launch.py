@@ -27,10 +27,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from ament_index_python.packages import get_package_share_directory
 
+from clearpath_config.parser import ClearpathConfigParser
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution
+)
 
 from launch_ros.actions import PushRosNamespace
 
@@ -39,43 +50,65 @@ ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='false',
                           choices=['true', 'false'],
                           description='Use sim time'),
-    DeclareLaunchArgument('namespace', default_value='',
-                          description='Robot namespace')
+    DeclareLaunchArgument('setup_path',
+                          default_value='/etc/clearpath/',
+                          description='Clearpath setup path')
 ]
 
 
-def generate_launch_description():
+def launch_setup(context, *args, **kwargs):
+    # Packages
     pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
 
-    localization_params_arg = DeclareLaunchArgument(
-        'params',
-        default_value=PathJoinSubstitution(
-            [pkg_clearpath_nav2_demos, 'config', 'localization.yaml']),
-        description='Localization parameters')
-
-    map_arg = DeclareLaunchArgument(
-        'map',
-        description='Full path to map yaml file to load')
-
-    namespace = LaunchConfiguration('namespace')
+    # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
+    setup_path = LaunchConfiguration('setup_path')
+    map = LaunchConfiguration('map')
+
+    # Read robot YAML
+    config = ClearpathConfigParser.read_yaml(setup_path.perform(context) + 'robot.yaml')
+    # Parse robot YAML into config
+    clearpath_config = ClearpathConfigParser(config)
+
+    namespace = clearpath_config.system.get_namespace()
+    platform_model = clearpath_config.platform.get_model()
+
+    file_parameters = PathJoinSubstitution([
+        pkg_clearpath_nav2_demos,
+        'config',
+        platform_model,
+        'localization.yaml'])
+
+    launch_localization = PathJoinSubstitution(
+      [pkg_nav2_bringup, 'launch', 'localization_launch.py'])
 
     localization = GroupAction([
         PushRosNamespace(namespace),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [pkg_nav2_bringup, 'launch', 'localization_launch.py'])),
-            launch_arguments={'namespace': namespace,
-                              'map': LaunchConfiguration('map'),
-                              'use_sim_time': use_sim_time,
-                              'params_file': LaunchConfiguration('params')}.items()),
+            PythonLaunchDescriptionSource(launch_localization),
+            launch_arguments=[
+                ('namespace', namespace),
+                ('map', map),
+                ('use_sim_time', use_sim_time),
+                ('params_file', file_parameters)
+              ]
+        ),
     ])
 
+    return [localization]
+
+
+def generate_launch_description():
+    pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
+
+    map_arg = DeclareLaunchArgument(
+        'map',
+        default_value=PathJoinSubstitution([pkg_clearpath_nav2_demos, 'maps', 'warehouse.yaml']),
+        description='Full path to map yaml file to load')
+
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(localization_params_arg)
     ld.add_action(map_arg)
-    ld.add_action(localization)
+    ld.add_action(OpaqueFunction(function=launch_setup))
     return ld

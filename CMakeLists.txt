@@ -7,11 +7,8 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(nav2_bringup REQUIRED)
-find_package(slam_toolbox REQUIRED)
 
-
-install(DIRECTORY config launch
+install(DIRECTORY config launch maps
   DESTINATION share/${PROJECT_NAME}
 )
 

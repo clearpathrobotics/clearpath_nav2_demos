@@ -27,10 +27,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from ament_index_python.packages import get_package_share_directory
 
+from clearpath_config.parser import ClearpathConfigParser
+
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution
+)
 
 from launch_ros.actions import PushRosNamespace
 
@@ -39,41 +50,55 @@ ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='false',
                           choices=['true', 'false'],
                           description='Use sim time'),
+    DeclareLaunchArgument('setup_path',
+                          default_value='/etc/clearpath/',
+                          description='Clearpath setup path')
 ]
 
 
-def generate_launch_description():
+def launch_setup(context, *args, **kwargs):
+    # Packages
     pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
 
-    nav2_params_arg = DeclareLaunchArgument(
-        'params_file',
-        default_value=PathJoinSubstitution(
-            [pkg_clearpath_nav2_demos, 'config', 'nav2.yaml']),
-        description='Nav2 parameters')
-
-    namespace_arg = DeclareLaunchArgument(
-                        'namespace',
-                        default_value='',
-                        description='Robot namespace')
-
-    namespace = LaunchConfiguration('namespace')
+    # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
+    setup_path = LaunchConfiguration('setup_path')
+
+    # Read robot YAML
+    config = ClearpathConfigParser.read_yaml(setup_path.perform(context) + 'robot.yaml')
+    # Parse robot YAML into config
+    clearpath_config = ClearpathConfigParser(config)
+
+    namespace = clearpath_config.system.get_namespace()
+    platform_model = clearpath_config.platform.get_model()
+
+    file_parameters = PathJoinSubstitution([
+        pkg_clearpath_nav2_demos,
+        'config',
+        platform_model,
+        'nav2.yaml'])
+
+    launch_nav2 = PathJoinSubstitution(
+      [pkg_nav2_bringup, 'launch', 'navigation_launch.py'])
 
     nav2 = GroupAction([
         PushRosNamespace(namespace),
 
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [pkg_nav2_bringup, 'launch', 'navigation_launch.py'])),
-            launch_arguments={'use_sim_time': use_sim_time,
-                              'use_composition': 'False',
-                              'params_file': LaunchConfiguration('params_file')}.items()),
+            PythonLaunchDescriptionSource(launch_nav2),
+            launch_arguments=[
+                ('use_sim_time', use_sim_time),
+                ('params_file', file_parameters),
+                ('use_composition', 'False')
+              ]
+        ),
     ])
 
+    return [nav2]
+
+
+def generate_launch_description():
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(nav2_params_arg)
-    ld.add_action(namespace_arg)
-    ld.add_action(nav2)
+    ld.add_action(OpaqueFunction(function=launch_setup))
     return ld
