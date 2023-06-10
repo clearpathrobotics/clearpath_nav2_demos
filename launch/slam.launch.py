@@ -1,52 +1,99 @@
-# Copyright 2021 Clearpath Robotics, Inc.
+# Software License Agreement (BSD)
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# @author    Roni Kreinin <rkreinin@clearpathrobotics.com>
+# @copyright (c) 2023, Clearpath Robotics, Inc., All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# * Neither the name of Clearpath Robotics nor the names of its contributors
+#   may be used to endorse or promote products derived from this software
+#   without specific prior written permission.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# @author Roni Kreinin (rkreinin@clearpathrobotics.com)
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+from ament_index_python.packages import get_package_share_directory
 
+from clearpath_config.parser import ClearpathConfigParser
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction
+)
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution
+)
 
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
 
 
 ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='false',
                           choices=['true', 'false'],
                           description='Use sim time'),
+    DeclareLaunchArgument('setup_path',
+                          default_value='/etc/clearpath/',
+                          description='Clearpath setup path')
 ]
 
 
-def generate_launch_description():
-    pkg_clearpath_nav2_demos = FindPackageShare('clearpath_nav2_demos')
+def launch_setup(context, *args, **kwargs):
+    # Packages
+    pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
 
-    slam_config = PathJoinSubstitution(
-        [pkg_clearpath_nav2_demos, 'config', 'slam.yaml'])
+    # Launch Configurations
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    setup_path = LaunchConfiguration('setup_path')
+
+    # Read robot YAML
+    config = ClearpathConfigParser.read_yaml(setup_path.perform(context) + 'robot.yaml')
+    # Parse robot YAML into config
+    clearpath_config = ClearpathConfigParser(config)
+
+    namespace = clearpath_config.system.get_namespace()
+    platform_model = clearpath_config.platform.get_model()
+
+    file_parameters = PathJoinSubstitution([
+        pkg_clearpath_nav2_demos,
+        'config',
+        platform_model,
+        'slam.yaml'])
 
     slam = Node(
-            package='slam_toolbox',
-            executable='sync_slam_toolbox_node',
-            name='slam_toolbox',
-            output='screen',
-            parameters=[
-              slam_config,
-              {'use_sim_time': LaunchConfiguration('use_sim_time')}
-            ],
-        )
+        package='slam_toolbox',
+        executable='sync_slam_toolbox_node',
+        name='slam_toolbox',
+        namespace=namespace,
+        output='screen',
+        parameters=[
+          file_parameters,
+          {'use_sim_time': use_sim_time}
+        ],
+    )
 
+    return [slam]
+
+
+def generate_launch_description():
     ld = LaunchDescription(ARGUMENTS)
-    ld.add_action(slam)
+    ld.add_action(OpaqueFunction(function=launch_setup))
     return ld

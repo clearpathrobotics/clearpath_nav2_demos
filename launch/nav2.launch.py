@@ -1,183 +1,104 @@
-# Copyright 2022 Clearpath Robotics, Inc.
+# Software License Agreement (BSD)
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# @author    Roni Kreinin <rkreinin@clearpathrobotics.com>
+# @copyright (c) 2023, Clearpath Robotics, Inc., All rights reserved.
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# * Redistributions of source code must retain the above copyright notice,
+#   this list of conditions and the following disclaimer.
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# * Neither the name of Clearpath Robotics nor the names of its contributors
+#   may be used to endorse or promote products derived from this software
+#   without specific prior written permission.
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+from ament_index_python.packages import get_package_share_directory
 
+from clearpath_config.parser import ClearpathConfigParser
 
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, GroupAction,
-                            IncludeLaunchDescription, SetEnvironmentVariable)
-from launch.conditions import IfCondition
+from launch.actions import (
+    DeclareLaunchArgument,
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction
+)
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 
-from launch_ros.actions import Node, PushRosNamespace
-from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution
+)
 
-from nav2_common.launch import RewrittenYaml
+from launch_ros.actions import PushRosNamespace
+
+
+ARGUMENTS = [
+    DeclareLaunchArgument('use_sim_time', default_value='false',
+                          choices=['true', 'false'],
+                          description='Use sim time'),
+    DeclareLaunchArgument('setup_path',
+                          default_value='/etc/clearpath/',
+                          description='Clearpath setup path')
+]
+
+
+def launch_setup(context, *args, **kwargs):
+    # Packages
+    pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
+    pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
+
+    # Launch Configurations
+    use_sim_time = LaunchConfiguration('use_sim_time')
+    setup_path = LaunchConfiguration('setup_path')
+
+    # Read robot YAML
+    config = ClearpathConfigParser.read_yaml(setup_path.perform(context) + 'robot.yaml')
+    # Parse robot YAML into config
+    clearpath_config = ClearpathConfigParser(config)
+
+    namespace = clearpath_config.system.get_namespace()
+    platform_model = clearpath_config.platform.get_model()
+
+    file_parameters = PathJoinSubstitution([
+        pkg_clearpath_nav2_demos,
+        'config',
+        platform_model,
+        'nav2.yaml'])
+
+    launch_nav2 = PathJoinSubstitution(
+      [pkg_nav2_bringup, 'launch', 'navigation_launch.py'])
+
+    nav2 = GroupAction([
+        PushRosNamespace(namespace),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_nav2),
+            launch_arguments=[
+                ('use_sim_time', use_sim_time),
+                ('params_file', file_parameters),
+                ('use_composition', 'False')
+              ]
+        ),
+    ])
+
+    return [nav2]
 
 
 def generate_launch_description():
-    # Get the launch directory
-    pkg_nav2_bringup = FindPackageShare('nav2_bringup')
-    pkg_clearpath_nav2_demos = FindPackageShare('clearpath_nav2_demos')
-
-    # Create the launch configuration variables
-    namespace = LaunchConfiguration('namespace')
-    use_namespace = LaunchConfiguration('use_namespace')
-    map_yaml_file = LaunchConfiguration('map')
-    use_sim_time = LaunchConfiguration('use_sim_time')
-    params_file = LaunchConfiguration('params_file')
-    autostart = LaunchConfiguration('autostart')
-    use_composition = LaunchConfiguration('use_composition')
-    localization = LaunchConfiguration('localization')
-
-    remappings = [('/tf', 'tf'),
-                  ('/tf_static', 'tf_static')]
-
-    # Create our own temporary YAML files that include substitutions
-    param_substitutions = {
-        'use_sim_time': use_sim_time,
-        'yaml_filename': map_yaml_file}
-
-    configured_params = RewrittenYaml(
-        source_file=params_file,
-        root_key=namespace,
-        param_rewrites=param_substitutions,
-        convert_types=True)
-
-    stdout_linebuf_envvar = SetEnvironmentVariable(
-        'RCUTILS_LOGGING_BUFFERED_STREAM', '1')
-
-    declare_namespace_cmd = DeclareLaunchArgument(
-        'namespace',
-        default_value='',
-        description='Top-level namespace')
-
-    declare_use_namespace_cmd = DeclareLaunchArgument(
-        'use_namespace',
-        default_value='false',
-        description='Whether to apply a namespace to the navigation stack')
-
-    declare_slam_cmd = DeclareLaunchArgument(
-        'slam',
-        default_value='false',
-        choices=['true', 'false'],
-        description='Whether to run a SLAM')
-
-    declare_localization_cmd = DeclareLaunchArgument(
-        'localization',
-        default_value='false',
-        choices=['true', 'false'],
-        description='Whether to run localization')
-
-    declare_nav2_cmd = DeclareLaunchArgument(
-        'nav2',
-        default_value='true',
-        choices=['true', 'false'],
-        description='Whether to run Nav2')
-
-    declare_map_yaml_cmd = DeclareLaunchArgument(
-        'map',
-        default_value=PathJoinSubstitution(
-            [pkg_clearpath_nav2_demos,
-             'maps',
-             'depot.yaml']),
-        description='Full path to map yaml file to load')
-
-    declare_use_sim_time_cmd = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='false',
-        description='Use simulation (Gazebo) clock if true')
-
-    declare_params_file_cmd = DeclareLaunchArgument(
-        'params_file',
-        default_value=PathJoinSubstitution(
-            [pkg_clearpath_nav2_demos,
-             'config',
-             'nav2.yaml']),
-        description='Full path to the ROS2 parameters file to use for all launched nodes')
-
-    declare_autostart_cmd = DeclareLaunchArgument(
-        'autostart', default_value='true',
-        description='Automatically startup the nav2 stack')
-
-    declare_use_composition_cmd = DeclareLaunchArgument(
-        'use_composition', default_value='True',
-        description='Whether to use composed bringup')
-
-    # Specify the actions
-    bringup_cmd_group = GroupAction([
-        PushRosNamespace(
-            condition=IfCondition(use_namespace),
-            namespace=namespace),
-
-        Node(
-            condition=IfCondition(use_composition),
-            name='nav2_container',
-            package='rclcpp_components',
-            executable='component_container',
-            parameters=[configured_params, {'autostart': autostart}],
-            remappings=remappings,
-            output='screen'),
-
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [pkg_nav2_bringup,
-                     'launch',
-                     'localization_launch.py'])),
-            condition=IfCondition(localization),
-            launch_arguments={'namespace': namespace,
-                              'map': map_yaml_file,
-                              'use_sim_time': use_sim_time,
-                              'autostart': autostart,
-                              'params_file': params_file,
-                              'use_composition': use_composition,
-                              'container_name': 'nav2_container'}.items()),
-
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                PathJoinSubstitution(
-                    [pkg_nav2_bringup,
-                     'launch',
-                     'navigation_launch.py'])),
-            launch_arguments={'namespace': namespace,
-                              'use_sim_time': use_sim_time,
-                              'autostart': autostart,
-                              'params_file': params_file,
-                              'use_composition': use_composition,
-                              'container_name': 'nav2_container'}.items()),
-    ])
-
-    # Create the launch description and populate
-    ld = LaunchDescription()
-
-    # Set environment variables
-    ld.add_action(stdout_linebuf_envvar)
-
-    # Declare the launch options
-    ld.add_action(declare_namespace_cmd)
-    ld.add_action(declare_use_namespace_cmd)
-    ld.add_action(declare_slam_cmd)
-    ld.add_action(declare_localization_cmd)
-    ld.add_action(declare_nav2_cmd)
-    ld.add_action(declare_map_yaml_cmd)
-    ld.add_action(declare_use_sim_time_cmd)
-    ld.add_action(declare_params_file_cmd)
-    ld.add_action(declare_autostart_cmd)
-    ld.add_action(declare_use_composition_cmd)
-
-    # Add the actions to launch all of the navigation nodes
-    ld.add_action(bringup_cmd_group)
-
+    ld = LaunchDescription(ARGUMENTS)
+    ld.add_action(OpaqueFunction(function=launch_setup))
     return ld
