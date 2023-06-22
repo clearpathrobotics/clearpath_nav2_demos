@@ -32,11 +32,8 @@ from clearpath_config.parser import ClearpathConfigParser
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-    GroupAction,
-    IncludeLaunchDescription,
     OpaqueFunction
 )
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch.substitutions import (
     LaunchConfiguration,
@@ -44,6 +41,8 @@ from launch.substitutions import (
 )
 
 from launch_ros.actions import Node
+
+from nav2_common.launch import RewrittenYaml
 
 
 ARGUMENTS = [
@@ -78,6 +77,13 @@ def launch_setup(context, *args, **kwargs):
         platform_model,
         'slam.yaml'])
 
+    rewritten_parameters = RewrittenYaml(
+        source_file=file_parameters,
+        root_key=namespace,
+        param_rewrites={},
+        convert_types=True
+    )
+
     slam = Node(
         package='slam_toolbox',
         executable='sync_slam_toolbox_node',
@@ -85,9 +91,16 @@ def launch_setup(context, *args, **kwargs):
         namespace=namespace,
         output='screen',
         parameters=[
-          file_parameters,
+          rewritten_parameters,
           {'use_sim_time': use_sim_time}
         ],
+        remappings=[
+          ('/tf', 'tf'),
+          ('/tf_static', 'tf_static'),
+          ('/scan', 'platform/sensors/lidar2d_0/scan'),
+          ('/map', 'map'),
+          ('/map_metadata', 'map_metadata'),
+        ]
     )
 
     return [slam]
