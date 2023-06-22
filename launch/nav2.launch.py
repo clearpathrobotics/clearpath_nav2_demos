@@ -90,7 +90,8 @@ def launch_setup(context, *args, **kwargs):
             launch_arguments=[
                 ('use_sim_time', use_sim_time),
                 ('params_file', file_parameters),
-                ('use_composition', 'False')
+                ('use_composition', 'False'),
+                ('namespace', namespace)
               ]
         ),
     ])
