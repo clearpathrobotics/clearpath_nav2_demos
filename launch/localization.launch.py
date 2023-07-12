@@ -27,7 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from ament_index_python.packages import get_package_share_directory
 
-from clearpath_config.parser import ClearpathConfigParser
+from clearpath_config.common.utils.yaml import read_yaml
+from clearpath_config.clearpath_config import ClearpathConfig
 
 from launch import LaunchDescription
 from launch.actions import (
@@ -67,11 +68,11 @@ def launch_setup(context, *args, **kwargs):
     map = LaunchConfiguration('map')
 
     # Read robot YAML
-    config = ClearpathConfigParser.read_yaml(setup_path.perform(context) + 'robot.yaml')
+    config = read_yaml(setup_path.perform(context) + 'robot.yaml')
     # Parse robot YAML into config
-    clearpath_config = ClearpathConfigParser(config)
+    clearpath_config = ClearpathConfig(config)
 
-    namespace = clearpath_config.system.get_namespace()
+    namespace = clearpath_config.system.namespace
     platform_model = clearpath_config.platform.get_model()
 
     file_parameters = PathJoinSubstitution([
