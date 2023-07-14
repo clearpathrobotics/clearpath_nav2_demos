@@ -4,6 +4,7 @@
   <name>clearpath_nav2_demos</name>
   <version>0.0.0</version>
   <description>Nav2 demos for Clearpath robots</description>
+
   <license>BSD</license>
 
   <author email="rkreinin@clearpathrobotics.com">Roni Kreinin</author>
