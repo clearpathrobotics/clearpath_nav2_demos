@@ -2,6 +2,12 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated sensor namespace
+* Linter fix
+* Contributors: Roni Kreinin
+
 0.0.1 (2023-07-17)
 ------------------
 * Added space to package.xml.
