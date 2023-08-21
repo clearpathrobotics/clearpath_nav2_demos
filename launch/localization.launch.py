@@ -73,7 +73,7 @@ def launch_setup(context, *args, **kwargs):
     clearpath_config = ClearpathConfig(config)
 
     namespace = clearpath_config.system.namespace
-    platform_model = clearpath_config.platform.get_model()
+    platform_model = clearpath_config.platform.get_platform_model()
 
     file_parameters = PathJoinSubstitution([
         pkg_clearpath_nav2_demos,
