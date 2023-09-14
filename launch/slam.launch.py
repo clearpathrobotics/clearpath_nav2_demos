@@ -70,7 +70,7 @@ def launch_setup(context, *args, **kwargs):
     clearpath_config = ClearpathConfig(config)
 
     namespace = clearpath_config.system.namespace
-    platform_model = clearpath_config.platform.get_model()
+    platform_model = clearpath_config.platform.get_platform_model()
 
     file_parameters = PathJoinSubstitution([
         pkg_clearpath_nav2_demos,
@@ -98,7 +98,7 @@ def launch_setup(context, *args, **kwargs):
         remappings=[
           ('/tf', 'tf'),
           ('/tf_static', 'tf_static'),
-          ('/scan', 'platform/sensors/lidar2d_0/scan'),
+          ('/scan', 'sensors/lidar2d_0/scan'),
           ('/map', 'map'),
           ('/map_metadata', 'map_metadata'),
         ]

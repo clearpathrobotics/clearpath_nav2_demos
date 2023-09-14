@@ -44,7 +44,7 @@ from launch.substitutions import (
     PathJoinSubstitution
 )
 
-from launch_ros.actions import PushRosNamespace
+from launch_ros.actions import PushRosNamespace, SetRemap
 
 
 ARGUMENTS = [
@@ -72,7 +72,7 @@ def launch_setup(context, *args, **kwargs):
     clearpath_config = ClearpathConfig(config)
 
     namespace = clearpath_config.system.namespace
-    platform_model = clearpath_config.platform.get_model()
+    platform_model = clearpath_config.platform.get_platform_model()
 
     file_parameters = PathJoinSubstitution([
         pkg_clearpath_nav2_demos,
@@ -85,6 +85,10 @@ def launch_setup(context, *args, **kwargs):
 
     nav2 = GroupAction([
         PushRosNamespace(namespace),
+        SetRemap('/' + namespace + '/global_costmap/sensors/lidar2d_0/scan',
+                 '/' + namespace + '/sensors/lidar2d_0/scan'),
+        SetRemap('/' + namespace + '/local_costmap/sensors/lidar2d_0/scan',
+                 '/' + namespace + '/sensors/lidar2d_0/scan'),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_nav2),
