@@ -2,6 +2,13 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Updated get model function and remapped scan topics
+  * Update get model function to match clearpath config
+  * Remap to correct namespacing on scan topics
+* Contributors: Hilary Luo
+
 0.0.2 (2023-07-27)
 ------------------
 * Updated sensor namespace
