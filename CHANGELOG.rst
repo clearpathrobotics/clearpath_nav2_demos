@@ -2,6 +2,12 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Increased inflation radius
+* Added W200 configs
+* Contributors: Roni Kreinin
+
 0.1.0 (2023-09-15)
 ------------------
 * Updated get model function and remapped scan topics
