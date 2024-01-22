@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2024-01-22)
+------------------
 * Increased inflation radius
 * Added W200 configs
 * Contributors: Roni Kreinin
