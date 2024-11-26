@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.0 (2024-11-25)
+------------------
 * Added minimum version.
 * Add config files for dingo, ridgeback. Waiting for confirmation that the acceleration limits & max angular velocities are correct
 * Copy velocity & acceleration limits from clearpath_control
