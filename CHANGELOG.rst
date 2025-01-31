@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.0 (2025-01-31)
+------------------
 * Enable stamped cmd_vel messages for Nav2
 * Add Nav2 config files for A300. Not yet tested on the physical robot (`#18 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/18>`_)
 * Remove repos file from CI; it doesn't exist in this repo
