@@ -224,7 +224,7 @@ smoother_server:
 
 behavior_server:
   ros__parameters:
-        enable_stamped_cmd_vel: true
+    enable_stamped_cmd_vel: true
     local_costmap_topic: local_costmap/costmap_raw
     global_costmap_topic: global_costmap/costmap_raw
     local_footprint_topic: local_costmap/published_footprint
@@ -245,10 +245,11 @@ behavior_server:
     local_frame: odom
     robot_base_frame: base_link
     transform_tolerance: 0.1
+    enable_stamped_cmd_vel: true
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
-    min_rotational_vel: 0.4
-    rotational_acc_lim: 3.2
+    min_rotational_vel: 0.2
+    rotational_acc_lim: 0.5
 
 waypoint_follower:
   ros__parameters:
