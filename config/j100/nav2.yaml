@@ -272,7 +272,7 @@ velocity_smoother:
     min_velocity: [-2.0, 0.0, -4.0]
     max_accel: [20.0, 0.0, 25.0]
     max_decel: [-20.0, 0.0, -25.0]
-    odom_topic: "odom"
+    odom_topic: "platform/odom/filtered"
     odom_duration: 0.1
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
