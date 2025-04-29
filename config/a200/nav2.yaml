@@ -136,6 +136,7 @@ local_costmap:
       height: 5
       resolution: 0.06
       footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
+      always_send_full_costmap: true
       plugins: ["static_layer", "voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -164,7 +165,6 @@ local_costmap:
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: true
-      always_send_full_costmap: true
 
 global_costmap:
   global_costmap:
@@ -177,6 +177,7 @@ global_costmap:
       footprint: "[ [0.55, 0.45], [0.55, -0.45], [-0.55, -0.45], [-0.55, 0.45] ]"
       resolution: 0.06
       track_unknown_space: true
+      always_send_full_costmap: true
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -199,7 +200,6 @@ global_costmap:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 4.0
         inflation_radius: 0.8
-      always_send_full_costmap: true
 
 planner_server:
   ros__parameters:
