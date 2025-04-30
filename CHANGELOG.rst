@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.4.0 (2025-04-30)
+------------------
 * Update nav2 configuration files for Jazzy (`#21 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/21>`_)
 * use_sim_time should not be in the yaml in Jazzy (`#19 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/19>`_)
 * Contributors: Chris Iverach-Brereton, Hilary Luo
