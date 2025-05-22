@@ -89,6 +89,8 @@ def launch_setup(context, *args, **kwargs):
                  '/' + namespace + '/sensors/lidar2d_0/scan'),
         SetRemap('/' + namespace + '/local_costmap/sensors/lidar2d_0/scan',
                  '/' + namespace + '/sensors/lidar2d_0/scan'),
+        SetRemap('/' + namespace + '/odom',
+                 '/' + namespace + '/platform/odom'),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_nav2),
