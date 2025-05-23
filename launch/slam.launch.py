@@ -33,15 +33,18 @@ from clearpath_config.common.utils.yaml import read_yaml
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
-    OpaqueFunction
+    GroupAction,
+    IncludeLaunchDescription,
+    OpaqueFunction,
 )
-
+from launch.conditions import IfCondition, UnlessCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     LaunchConfiguration,
-    PathJoinSubstitution
+    PathJoinSubstitution,
 )
 
-from launch_ros.actions import Node
+from launch_ros.actions import PushRosNamespace, SetRemap
 
 from nav2_common.launch import RewrittenYaml
 
@@ -52,17 +55,30 @@ ARGUMENTS = [
                           description='Use sim time'),
     DeclareLaunchArgument('setup_path',
                           default_value='/etc/clearpath/',
-                          description='Clearpath setup path')
+                          description='Clearpath setup path'),
+    DeclareLaunchArgument('autostart', default_value='true',
+                          choices=['true', 'false'],
+                          description='Automatically startup the slamtoolbox. Ignored when use_lifecycle_manager is true.'),  # noqa: E501
+    DeclareLaunchArgument('use_lifecycle_manager', default_value='false',
+                          choices=['true', 'false'],
+                          description='Enable bond connection during node activation'),
+    DeclareLaunchArgument('sync', default_value='true',
+                          choices=['true', 'false'],
+                          description='Use synchronous SLAM'),
 ]
 
 
 def launch_setup(context, *args, **kwargs):
     # Packages
     pkg_clearpath_nav2_demos = get_package_share_directory('clearpath_nav2_demos')
+    pkg_slam_toolbox = get_package_share_directory('slam_toolbox')
 
     # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
     setup_path = LaunchConfiguration('setup_path')
+    autostart = LaunchConfiguration('autostart')
+    use_lifecycle_manager = LaunchConfiguration('use_lifecycle_manager')
+    sync = LaunchConfiguration('sync')
 
     # Read robot YAML
     config = read_yaml(setup_path.perform(context) + 'robot.yaml')
@@ -85,24 +101,43 @@ def launch_setup(context, *args, **kwargs):
         convert_types=True
     )
 
-    slam = Node(
-        package='slam_toolbox',
-        executable='async_slam_toolbox_node',
-        name='slam_toolbox',
-        namespace=namespace,
-        output='screen',
-        parameters=[
-          rewritten_parameters,
-          {'use_sim_time': use_sim_time}
-        ],
-        remappings=[
-          ('/tf', 'tf'),
-          ('/tf_static', 'tf_static'),
-          ('/scan', 'sensors/lidar2d_0/scan'),
-          ('/map', 'map'),
-          ('/map_metadata', 'map_metadata'),
-        ]
-    )
+    launch_slam_sync = PathJoinSubstitution(
+        [pkg_slam_toolbox, 'launch', 'online_sync_launch.py'])
+
+    launch_slam_async = PathJoinSubstitution(
+        [pkg_slam_toolbox, 'launch', 'online_async_launch.py'])
+
+    slam = GroupAction([
+        PushRosNamespace(namespace),
+
+        SetRemap('/tf', '/' + namespace + '/tf'),
+        SetRemap('/tf_static', '/' + namespace + '/tf_static'),
+        SetRemap('/scan', '/' + namespace + '/scan'),
+        SetRemap('/map', '/' + namespace + '/map'),
+        SetRemap('/map_metadata', '/' + namespace + '/map_metadata'),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_slam_sync),
+            launch_arguments=[
+                ('use_sim_time', use_sim_time),
+                ('autostart', autostart),
+                ('use_lifecycle_manager', use_lifecycle_manager),
+                ('slam_params_file', rewritten_parameters)
+            ],
+            condition=IfCondition(sync)
+        ),
+
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_slam_async),
+            launch_arguments=[
+                ('use_sim_time', use_sim_time),
+                ('autostart', autostart),
+                ('use_lifecycle_manager', use_lifecycle_manager),
+                ('slam_params_file', rewritten_parameters)
+            ],
+            condition=UnlessCondition(sync)
+        )
+    ])
 
     return [slam]
 
