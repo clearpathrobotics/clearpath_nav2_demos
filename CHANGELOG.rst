@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.0 (2025-05-30)
+------------------
 * Fix typos in issue templates (`#27 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/27>`_)
 * Add parameter files for Dingo (all variants), Ridgeback (`#25 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/25>`_)
   * Add parameter files for Dingo (all variants), Ridgeback
