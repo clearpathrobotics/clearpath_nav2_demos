@@ -25,6 +25,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+import os
+
 from ament_index_python.packages import get_package_share_directory
 
 from clearpath_config.clearpath_config import ClearpathConfig
@@ -81,7 +83,7 @@ def launch_setup(context, *args, **kwargs):
     sync = LaunchConfiguration('sync')
 
     # Read robot YAML
-    config = read_yaml(setup_path.perform(context) + 'robot.yaml')
+    config = read_yaml(os.path.join(setup_path.perform(context), 'robot.yaml'))
     # Parse robot YAML into config
     clearpath_config = ClearpathConfig(config)
 
