@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.0 (2025-08-25)
+------------------
 * Accept setup path with or without a trailing slash (`#30 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/30>`_)
 * Contributors: Hilary Luo
 
