@@ -12,8 +12,9 @@ slam_toolbox:
     # ROS Parameters
     odom_frame: odom
     map_frame: map
+    map_name: /map
     base_frame: base_link
-    scan_topic: sensors/lidar2d_0/scan
+    scan_topic: /scan
     mode: mapping
 
     debug_logging: false

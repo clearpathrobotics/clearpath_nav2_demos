@@ -99,7 +99,10 @@ def launch_setup(context, *args, **kwargs):
     rewritten_parameters = RewrittenYaml(
         source_file=file_parameters,
         root_key=namespace,
-        param_rewrites={},
+        param_rewrites={
+            'map_name': '/' + namespace + '/map',
+            'scan_topic': '/' + namespace + '/sensors/lidar2d_0/scan',
+        },
         convert_types=True
     )
 
@@ -114,9 +117,6 @@ def launch_setup(context, *args, **kwargs):
 
         SetRemap('/tf', '/' + namespace + '/tf'),
         SetRemap('/tf_static', '/' + namespace + '/tf_static'),
-        SetRemap('/scan', '/' + namespace + '/scan'),
-        SetRemap('/map', '/' + namespace + '/map'),
-        SetRemap('/map_metadata', '/' + namespace + '/map_metadata'),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_slam_sync),
