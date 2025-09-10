@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.7.1 (2025-09-10)
+------------------
 * Fix SLAM parameter rewrites for Jazzy (`#31 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/31>`_)
   * Set the scan_topic parameter to the fully qualified topic, set the map_name parameter
   * Add a note about the scan_topic and map_name parameters getting rewritten by the launch file
