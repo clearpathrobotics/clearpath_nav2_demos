@@ -48,6 +48,8 @@ from launch.substitutions import (
 
 from launch_ros.actions import PushRosNamespace
 
+from nav2_common.launch import RewrittenYaml
+
 
 ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='false',
@@ -55,7 +57,10 @@ ARGUMENTS = [
                           description='Use sim time'),
     DeclareLaunchArgument('setup_path',
                           default_value='/etc/clearpath/',
-                          description='Clearpath setup path')
+                          description='Clearpath setup path'),
+    DeclareLaunchArgument('scan_topic',
+                          default_value='',
+                          description='Override the default 2D laserscan topic')
 ]
 
 
@@ -68,6 +73,7 @@ def launch_setup(context, *args, **kwargs):
     use_sim_time = LaunchConfiguration('use_sim_time')
     setup_path = LaunchConfiguration('setup_path')
     map = LaunchConfiguration('map')  # noqa:A001
+    scan_topic = LaunchConfiguration('scan_topic')
 
     # Read robot YAML
     config = read_yaml(os.path.join(setup_path.perform(context), 'robot.yaml'))
@@ -77,11 +83,23 @@ def launch_setup(context, *args, **kwargs):
     namespace = clearpath_config.system.namespace
     platform_model = clearpath_config.platform.get_platform_model()
 
+    eval_scan_topic = scan_topic.perform(context)
+    if len(eval_scan_topic) == 0:
+        eval_scan_topic = f'/{namespace}/sensors/lidar2d_0/scan'
+
     file_parameters = PathJoinSubstitution([
         pkg_clearpath_nav2_demos,
         'config',
         platform_model,
         'localization.yaml'])
+
+    rewritten_parameters = RewrittenYaml(
+        source_file=file_parameters,
+        param_rewrites={
+            'scan_topic': eval_scan_topic,
+        },
+        convert_types=True
+    )
 
     launch_localization = PathJoinSubstitution(
       [pkg_nav2_bringup, 'launch', 'localization_launch.py'])
@@ -95,7 +113,7 @@ def launch_setup(context, *args, **kwargs):
                 ('namespace', namespace),
                 ('map', map),
                 ('use_sim_time', use_sim_time),
-                ('params_file', file_parameters)
+                ('params_file', rewritten_parameters)
               ]
         ),
     ])

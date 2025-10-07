@@ -67,6 +67,9 @@ ARGUMENTS = [
     DeclareLaunchArgument('sync', default_value='true',
                           choices=['true', 'false'],
                           description='Use synchronous SLAM'),
+    DeclareLaunchArgument('scan_topic',
+                          default_value='',
+                          description='Override the default 2D laserscan topic')
 ]
 
 
@@ -81,6 +84,7 @@ def launch_setup(context, *args, **kwargs):
     autostart = LaunchConfiguration('autostart')
     use_lifecycle_manager = LaunchConfiguration('use_lifecycle_manager')
     sync = LaunchConfiguration('sync')
+    scan_topic = LaunchConfiguration('scan_topic')
 
     # Read robot YAML
     config = read_yaml(os.path.join(setup_path.perform(context), 'robot.yaml'))
@@ -89,6 +93,10 @@ def launch_setup(context, *args, **kwargs):
 
     namespace = clearpath_config.system.namespace
     platform_model = clearpath_config.platform.get_platform_model()
+    eval_scan_topic = scan_topic.perform(context)
+
+    if len(eval_scan_topic) == 0:
+        eval_scan_topic = f'/{namespace}/sensors/lidar2d_0/scan'
 
     file_parameters = PathJoinSubstitution([
         pkg_clearpath_nav2_demos,
@@ -101,7 +109,7 @@ def launch_setup(context, *args, **kwargs):
         root_key=namespace,
         param_rewrites={
             'map_name': '/' + namespace + '/map',
-            'scan_topic': '/' + namespace + '/sensors/lidar2d_0/scan',
+            'scan_topic': eval_scan_topic,
         },
         convert_types=True
     )
