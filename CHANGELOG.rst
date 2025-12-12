@@ -2,6 +2,11 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add `scan_topic` launch argument (`#32 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/32>`_)
+* Contributors: Chris Iverach-Brereton
+
 2.7.1 (2025-09-10)
 ------------------
 * Fix SLAM parameter rewrites for Jazzy (`#31 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/31>`_)
