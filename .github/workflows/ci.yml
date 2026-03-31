@@ -23,12 +23,11 @@ jobs:
 
   clearpath_nav2_demos_src_ci:
     name: Jazzy Clearpath Source
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
+    container:
+      image: rostooling/setup-ros-docker:ubuntu-noble-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ros-tooling/setup-ros@v0.7
-        with:
-          required-ros-distributions: jazzy
       - uses: ros-tooling/action-ros-ci@v0.3
         id: action_ros_ci_step
         with:
