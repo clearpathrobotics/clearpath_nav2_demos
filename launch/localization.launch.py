@@ -27,8 +27,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 from ament_index_python.packages import get_package_share_directory
 
-from clearpath_config.common.utils.yaml import read_yaml
 from clearpath_config.clearpath_config import ClearpathConfig
+from clearpath_config.common.utils.yaml import read_yaml
 
 from launch import LaunchDescription
 from launch.actions import (
@@ -65,7 +65,7 @@ def launch_setup(context, *args, **kwargs):
     # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
     setup_path = LaunchConfiguration('setup_path')
-    map = LaunchConfiguration('map')
+    map_arg = LaunchConfiguration('map')
 
     # Read robot YAML
     config = read_yaml(setup_path.perform(context) + 'robot.yaml')
@@ -91,7 +91,7 @@ def launch_setup(context, *args, **kwargs):
             PythonLaunchDescriptionSource(launch_localization),
             launch_arguments=[
                 ('namespace', namespace),
-                ('map', map),
+                ('map', map_arg),
                 ('use_sim_time', use_sim_time),
                 ('params_file', file_parameters)
               ]
