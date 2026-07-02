@@ -110,6 +110,8 @@ def launch_setup(context, *args, **kwargs):
         PushRosNamespace(namespace),
         SetRemap('/' + namespace + '/odom',
                  '/' + namespace + '/platform/odom'),
+        SetRemap('/tf', '/' + namespace + '/tf'),
+        SetRemap('/tf_static', '/' + namespace + '/tf_static'),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_nav2),
