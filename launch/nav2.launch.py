@@ -85,10 +85,17 @@ def launch_setup(context, *args, **kwargs):
 
     nav2 = GroupAction([
         PushRosNamespace(namespace),
+<<<<<<< HEAD
         SetRemap('/' + namespace + '/global_costmap/sensors/lidar2d_0/scan',
                  '/' + namespace + '/sensors/lidar2d_0/scan'),
         SetRemap('/' + namespace + '/local_costmap/sensors/lidar2d_0/scan',
                  '/' + namespace + '/sensors/lidar2d_0/scan'),
+=======
+        SetRemap('/' + namespace + '/odom',
+                 '/' + namespace + '/platform/odom'),
+        SetRemap('/tf', '/' + namespace + '/tf'),
+        SetRemap('/tf_static', '/' + namespace + '/tf_static'),
+>>>>>>> 0fe534c (Remaped /tf and /tf_static into robot namespace in nav2.launch.py. (#38))
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_nav2),
