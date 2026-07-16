@@ -135,7 +135,7 @@ local_costmap:
       width: 5
       height: 5
       resolution: 0.06
-      footprint: "[ [0.254, 0.2159], [0.254, -0.2159], [-0.254, -0.2159], [-0.254, 0.2159] ]"
+      footprint: "[ [0.18, 0.15], [0.18, -0.15], [-0.18, -0.15], [-0.18, 0.15] ]"
       always_send_full_costmap: true
       plugins: ["static_layer", "voxel_layer", "inflation_layer"]
       inflation_layer:
@@ -174,10 +174,13 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      footprint: "[ [0.254, 0.2159], [0.254, -0.2159], [-0.254, -0.2159], [-0.254, 0.2159] ]"
+      footprint: "[ [0.18, 0.15], [0.18, -0.15], [-0.18, -0.15], [-0.18, 0.15] ]"
       resolution: 0.06
       track_unknown_space: true
       always_send_full_costmap: true
+      rolling_window: true
+      width: 20
+      height: 20
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -297,9 +300,9 @@ collision_monitor:
       type: "polygon"
       action_type: "approach"
       footprint_topic: "local_costmap/published_footprint"
-      time_before_collision: 1.2
+      time_before_collision: 0.3
       simulation_time_step: 0.1
-      min_points: 6
+      min_points: 12
       visualize: False
       enabled: True
     observation_sources: ["scan"]
