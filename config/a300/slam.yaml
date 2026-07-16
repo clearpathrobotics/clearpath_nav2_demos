@@ -10,10 +10,13 @@ slam_toolbox:
     ceres_loss_function: None
 
     # ROS Parameters
+    # These are modified by slam.launch.py
+    # Do mot modify the map_name or scan_topic here
     odom_frame: odom
     map_frame: map
+    map_name: /map
     base_frame: base_link
-    scan_topic: sensors/lidar2d_0/scan
+    scan_topic: /scan
     mode: mapping
 
     debug_logging: false
