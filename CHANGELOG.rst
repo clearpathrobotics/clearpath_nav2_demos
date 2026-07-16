@@ -2,6 +2,15 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Tuned slam_toolbox defaults: increase throttling, map update interval, and minimum travel thresholds. (`#42 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/42>`_)
+* Fixed global costmap rolling window and collision monitor tuning. (`#40 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/40>`_)
+* Remaped /tf and /tf_static into robot namespace in nav2.launch.py. (`#38 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/38>`_)
+* Changed to rostooling/setup-ros-docker:ubuntu-noble-latest for CI image. (`#36 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/36>`_)
+* Added mergify and auto-label. (`#34 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/34>`_)
+* Contributors: Tony Baltovski
+
 2.8.0 (2025-12-12)
 ------------------
 * Add `scan_topic` launch argument (`#32 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/32>`_)
