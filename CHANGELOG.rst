@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.8.1 (2026-07-16)
+------------------
 * Tuned slam_toolbox defaults: increase throttling, map update interval, and minimum travel thresholds. (`#42 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/42>`_)
 * Fixed global costmap rolling window and collision monitor tuning. (`#40 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/40>`_)
 * Remaped /tf and /tf_static into robot namespace in nav2.launch.py. (`#38 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/38>`_)
