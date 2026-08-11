@@ -248,7 +248,6 @@ behavior_server:
     local_frame: odom
     robot_base_frame: base_link
     transform_tolerance: 0.1
-    enable_stamped_cmd_vel: true
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
     min_rotational_vel: 0.2
