@@ -1,4 +1,4 @@
-name: clearpath_common_ci
+name: clearpath_nav2_demos_ci
 
 on:
   push:
@@ -17,18 +17,18 @@ jobs:
       fail-fast: false
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{matrix.env}}
 
-  clearpath_nav2_demos_src_ci:
+  source_build:
     name: Jazzy Clearpath Source
     runs-on: ubuntu-latest
     container:
       image: rostooling/setup-ros-docker:ubuntu-noble-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: ros-tooling/action-ros-ci@v0.3
+      - uses: actions/checkout@v7
+      - uses: ros-tooling/action-ros-ci@v0.4
         id: action_ros_ci_step
         with:
           target-ros2-distro: jazzy
