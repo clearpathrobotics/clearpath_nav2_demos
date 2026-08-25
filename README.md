@@ -26,7 +26,7 @@ flowchart LR
 ## Layout
 
 | Path | Description |
-|---|---|
+| --- | --- |
 | [`launch/slam.launch.py`](launch/slam.launch.py) | Online SLAM with `slam_toolbox` to build a new map. |
 | [`launch/localization.launch.py`](launch/localization.launch.py) | AMCL localization within an existing map. |
 | [`launch/nav2.launch.py`](launch/nav2.launch.py) | The Nav2 navigation stack (planner, controller, behaviors). |
