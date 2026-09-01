@@ -67,6 +67,18 @@ Confirm the demo launches cleanly and behaves correctly for the platform whose c
 Mismatched footprints or sensor frames are a common cause of poor navigation behavior, so verify
 the config matches the platform.
 
+## Continuous integration
+
+[`clearpath_nav2_demos_ci`](.github/workflows/ci.yml) runs on every pull request:
+
+- **jazzy** (`build_and_test`) — builds and tests against the released `testing`/`main` repos.
+- **Jazzy Clearpath Source** (`source_build`) — source build of `clearpath_nav2_demos`.
+
+Both jobs build against **released** dependencies and do not pull in upstream source branches, so
+they are not affected by in-progress branches in other Clearpath repositories — they should pass on
+their own. If a job fails, the cause is in this repository (or an already-released upstream
+dependency), not an unmerged upstream branch.
+
 ## Submitting a pull request
 
 1. Make sure the workspace builds and the affected demo launches correctly.
