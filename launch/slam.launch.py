@@ -57,13 +57,16 @@ ARGUMENTS = [
                           description='Use sim time'),
     DeclareLaunchArgument('mode', default_value='mapping',
                           choices=['mapping', 'localization', 'resume'],
-                          description='Build a map, localize on an occupancy map, or resume a serialized posegraph'),
+                          description='Build a map, localize on an occupancy map, or resume a '
+                                      'serialized posegraph'),
     DeclareLaunchArgument('map', default_value='',
                           description='Occupancy map YAML to load in localization mode'),
     DeclareLaunchArgument('posegraph', default_value='',
-                          description='Serialized Slam Toolbox posegraph to resume'),
+                          description='Serialized Slam Toolbox posegraph to '
+                                      'resume'),
     DeclareLaunchArgument('start_pose', default_value='',
-                          description='Posegraph resume pose as x,y,yaw; unset starts at the first node'),
+                          description='Posegraph resume pose as x,y,yaw; unset starts at the '
+                                      'first node'),
     DeclareLaunchArgument('setup_path',
                           default_value='/etc/clearpath/',
                           description='Clearpath setup path'),
@@ -157,7 +160,8 @@ def launch_setup(context, *args, **kwargs):
             try:
                 pose = [float(value.strip()) for value in start_pose.split(',')]
             except ValueError as exc:
-                raise RuntimeError('start_pose must be three comma-separated numbers: x,y,yaw') from exc
+                raise RuntimeError(
+                    'start_pose must be three comma-separated numbers: x,y,yaw') from exc
             if len(pose) != 3:
                 raise RuntimeError('start_pose must be three comma-separated numbers: x,y,yaw')
             param_rewrites['slam_toolbox.ros__parameters.map_start_pose'] = pose
