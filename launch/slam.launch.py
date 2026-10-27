@@ -46,7 +46,7 @@ from launch.substitutions import (
     PathJoinSubstitution,
 )
 
-from launch_ros.actions import PushRosNamespace, SetRemap
+from launch_ros.actions import Node, PushRosNamespace, SetRemap
 
 from nav2_common.launch import RewrittenYaml
 
@@ -55,6 +55,18 @@ ARGUMENTS = [
     DeclareLaunchArgument('use_sim_time', default_value='false',
                           choices=['true', 'false'],
                           description='Use sim time'),
+    DeclareLaunchArgument('mode', default_value='mapping',
+                          choices=['mapping', 'localization', 'resume'],
+                          description='Build a map, localize on an occupancy map, or resume a '
+                                      'serialized posegraph'),
+    DeclareLaunchArgument('map', default_value='',
+                          description='Occupancy map YAML to load in localization mode'),
+    DeclareLaunchArgument('posegraph', default_value='',
+                          description='Serialized Slam Toolbox posegraph to '
+                                      'resume'),
+    DeclareLaunchArgument('start_pose', default_value='',
+                          description='Posegraph resume pose as x,y,yaw; unset starts at the '
+                                      'first node'),
     DeclareLaunchArgument('setup_path',
                           default_value='/etc/clearpath/',
                           description='Clearpath setup path'),
@@ -69,7 +81,12 @@ ARGUMENTS = [
                           description='Use synchronous SLAM'),
     DeclareLaunchArgument('scan_topic',
                           default_value='',
-                          description='Override the default 2D laserscan topic')
+                          description='Override the default 2D laserscan topic'),
+    DeclareLaunchArgument('use_respawn', default_value='false',
+                          choices=['true', 'false'],
+                          description='Respawn the map saver if it crashes'),
+    DeclareLaunchArgument('log_level', default_value='info',
+                          description='Log level for the map saver')
 ]
 
 
@@ -80,11 +97,17 @@ def launch_setup(context, *args, **kwargs):
 
     # Launch Configurations
     use_sim_time = LaunchConfiguration('use_sim_time')
+    mode = LaunchConfiguration('mode').perform(context)
+    map_file = LaunchConfiguration('map').perform(context)
+    posegraph = LaunchConfiguration('posegraph').perform(context)
+    start_pose = LaunchConfiguration('start_pose').perform(context)
     setup_path = LaunchConfiguration('setup_path')
     autostart = LaunchConfiguration('autostart')
     use_lifecycle_manager = LaunchConfiguration('use_lifecycle_manager')
     sync = LaunchConfiguration('sync')
     scan_topic = LaunchConfiguration('scan_topic')
+    use_respawn = LaunchConfiguration('use_respawn')
+    log_level = LaunchConfiguration('log_level')
 
     # Read robot YAML
     config = read_yaml(os.path.join(setup_path.perform(context), 'robot.yaml'))
@@ -95,6 +118,26 @@ def launch_setup(context, *args, **kwargs):
     platform_model = clearpath_config.platform.get_platform_model()
     eval_scan_topic = scan_topic.perform(context)
 
+    if mode == 'localization':
+        if not map_file:
+            map_file = os.path.join(pkg_clearpath_nav2_demos, 'maps', 'warehouse.yaml')
+        if not os.path.isfile(map_file):
+            raise RuntimeError(f'Occupancy map does not exist: {map_file}')
+        localization_launch = PathJoinSubstitution([
+            pkg_clearpath_nav2_demos, 'launch', 'localization.launch.py'])
+        return [IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(localization_launch),
+            launch_arguments=[
+                ('use_sim_time', use_sim_time),
+                ('setup_path', setup_path),
+                ('scan_topic', scan_topic),
+                ('map', map_file),
+            ]
+        )]
+
+    if mode == 'resume' and not posegraph:
+        raise RuntimeError('posegraph must be provided when mode:=resume')
+
     if len(eval_scan_topic) == 0:
         eval_scan_topic = f'/{namespace}/sensors/lidar2d_0/scan'
 
@@ -104,13 +147,29 @@ def launch_setup(context, *args, **kwargs):
         platform_model,
         'slam.yaml'])
 
+    param_rewrites = {
+        'map_name': '/' + namespace + '/map',
+        'scan_topic': eval_scan_topic,
+    }
+    if mode == 'resume':
+        param_rewrites.update({
+            'slam_toolbox.ros__parameters.map_file_name': posegraph,
+            'slam_toolbox.ros__parameters.map_start_at_dock': 'false' if start_pose else 'true',
+        })
+        if start_pose:
+            try:
+                pose = [float(value.strip()) for value in start_pose.split(',')]
+            except ValueError as exc:
+                raise RuntimeError(
+                    'start_pose must be three comma-separated numbers: x,y,yaw') from exc
+            if len(pose) != 3:
+                raise RuntimeError('start_pose must be three comma-separated numbers: x,y,yaw')
+            param_rewrites['slam_toolbox.ros__parameters.map_start_pose'] = pose
+
     rewritten_parameters = RewrittenYaml(
         source_file=file_parameters,
         root_key=namespace,
-        param_rewrites={
-            'map_name': '/' + namespace + '/map',
-            'scan_topic': eval_scan_topic,
-        },
+        param_rewrites=param_rewrites,
         convert_types=True
     )
 
@@ -125,6 +184,27 @@ def launch_setup(context, *args, **kwargs):
 
         SetRemap('/tf', '/' + namespace + '/tf'),
         SetRemap('/tf_static', '/' + namespace + '/tf_static'),
+
+        Node(
+            package='nav2_map_server',
+            executable='map_saver_server',
+            output='screen',
+            respawn=use_respawn,
+            respawn_delay=2.0,
+            arguments=['--ros-args', '--log-level', log_level],
+            parameters=[rewritten_parameters, {'use_sim_time': use_sim_time}],
+        ),
+
+        Node(
+            package='nav2_lifecycle_manager',
+            executable='lifecycle_manager',
+            name='lifecycle_manager_slam',
+            output='screen',
+            arguments=['--ros-args', '--log-level', log_level],
+            parameters=[{'autostart': autostart,
+                         'node_names': ['map_saver'],
+                         'use_sim_time': use_sim_time}],
+        ),
 
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_slam_sync),

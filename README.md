@@ -31,7 +31,7 @@ flowchart LR
 | [`launch/localization.launch.py`](launch/localization.launch.py) | AMCL localization within an existing map. |
 | [`launch/nav2.launch.py`](launch/nav2.launch.py) | The Nav2 navigation stack (planner, controller, behaviors). |
 | [`config/`](config) | Per-platform parameter files (`a200`, `a300`, `dd100`, `dd150`, `do100`, `do150`, `j100`, `r100`, `w200`). |
-| [`maps/`](maps) | Sample maps (e.g. `warehouse.pgm` / `warehouse.yaml`) matching the simulator worlds. |
+| [`maps/`](maps) | Sample maps (`warehouse` and `office`, each a `.pgm` / `.yaml` pair) matching the simulator worlds. |
 
 ## Usage
 
@@ -48,6 +48,22 @@ Then, to navigate within a saved map:
 ros2 launch clearpath_nav2_demos localization.launch.py
 ros2 launch clearpath_nav2_demos nav2.launch.py
 ```
+
+`slam.launch.py` also takes a `mode` argument:
+
+| `mode` | Description |
+| --- | --- |
+| `mapping` | Build a new map (default). |
+| `localization` | Localize in an occupancy map given by `map:=/path/to/map.yaml`. Defaults to the `warehouse` map. |
+| `resume` | Continue mapping from a serialized slam_toolbox posegraph given by `posegraph:=/path/to/posegraph`. Starts at the first node unless `start_pose:=x,y,yaw` is set. |
+
+```bash
+ros2 launch clearpath_nav2_demos slam.launch.py mode:=localization map:=/path/to/map.yaml
+ros2 launch clearpath_nav2_demos slam.launch.py mode:=resume posegraph:=/path/to/posegraph start_pose:=1.0,2.0,0.0
+```
+
+While SLAM is running, the `map_saver` node can save the map through the `map_saver/save_map`
+service, and slam_toolbox can serialize a posegraph through its `serialize_map` service.
 
 See the [Clearpath navigation demos documentation](https://docs.clearpathrobotics.com/docs/ros/tutorials/navigation_demos/overview)
 for the full, platform-specific walkthrough.

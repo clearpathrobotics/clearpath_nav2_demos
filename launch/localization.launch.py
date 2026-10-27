@@ -39,6 +39,7 @@ from launch.actions import (
     IncludeLaunchDescription,
     OpaqueFunction
 )
+from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 from launch.substitutions import (
@@ -46,7 +47,7 @@ from launch.substitutions import (
     PathJoinSubstitution
 )
 
-from launch_ros.actions import PushRosNamespace
+from launch_ros.actions import Node, PushRosNamespace
 
 from nav2_common.launch import RewrittenYaml
 
@@ -60,7 +61,18 @@ ARGUMENTS = [
                           description='Clearpath setup path'),
     DeclareLaunchArgument('scan_topic',
                           default_value='',
-                          description='Override the default 2D laserscan topic')
+                          description='Override the default 2D laserscan topic'),
+    DeclareLaunchArgument('autostart', default_value='true',
+                          choices=['true', 'false'],
+                          description='Automatically start up map_server and AMCL'),
+    DeclareLaunchArgument('use_composition', default_value='false',
+                          choices=['true', 'false'],
+                          description='Load the localization nodes into a component container'),
+    DeclareLaunchArgument('use_respawn', default_value='false',
+                          choices=['true', 'false'],
+                          description='Respawn crashed nodes when use_composition is false'),
+    DeclareLaunchArgument('log_level', default_value='info',
+                          description='Log level')
 ]
 
 
@@ -74,6 +86,12 @@ def launch_setup(context, *args, **kwargs):
     setup_path = LaunchConfiguration('setup_path')
     map = LaunchConfiguration('map')  # noqa:A001
     scan_topic = LaunchConfiguration('scan_topic')
+    autostart = LaunchConfiguration('autostart')
+    # nav2_bringup evaluates this with PythonExpression, so it must be True/False
+    use_composition = str(LaunchConfiguration('use_composition').perform(context) == 'true')
+    use_respawn = LaunchConfiguration('use_respawn')
+    log_level = LaunchConfiguration('log_level')
+    container_name = 'localization_container'
 
     # Read robot YAML
     config = read_yaml(os.path.join(setup_path.perform(context), 'robot.yaml'))
@@ -107,13 +125,29 @@ def launch_setup(context, *args, **kwargs):
     localization = GroupAction([
         PushRosNamespace(namespace),
 
+        Node(
+            condition=IfCondition(use_composition),
+            package='rclcpp_components',
+            executable='component_container_isolated',
+            name=container_name,
+            output='screen',
+            arguments=['--ros-args', '--log-level', log_level],
+            parameters=[{'autostart': autostart, 'use_sim_time': use_sim_time}],
+            remappings=[('/tf', 'tf'), ('/tf_static', 'tf_static')],
+        ),
+
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_localization),
             launch_arguments=[
                 ('namespace', namespace),
                 ('map', map),
                 ('use_sim_time', use_sim_time),
-                ('params_file', rewritten_parameters)
+                ('params_file', rewritten_parameters),
+                ('autostart', autostart),
+                ('use_composition', use_composition),
+                ('container_name', container_name),
+                ('use_respawn', use_respawn),
+                ('log_level', log_level)
               ]
         ),
     ])
