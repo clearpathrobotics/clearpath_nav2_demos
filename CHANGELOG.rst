@@ -2,8 +2,8 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.9.0 (2026-10-29)
+------------------
 * Nav2 updates (`#55 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/55>`_)
   * Updated Nav2 behavior and platform configs.
   * Added SLAM localization and posegraph modes.
