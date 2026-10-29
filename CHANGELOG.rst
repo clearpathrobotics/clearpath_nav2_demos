@@ -2,6 +2,77 @@
 Changelog for package clearpath_nav2_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Nav2 updates (`#55 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/55>`_)
+  * Updated Nav2 behavior and platform configs.
+  * Added SLAM localization and posegraph modes.
+  * Added office map and update warehouse map.
+  * Fixed pre-commit.
+  * Updated README for SLAM modes and office map.
+* Bump https://github.com/PyCQA/flake8 from 7.3.0 to 7.4.1
+  Bumps [https://github.com/PyCQA/flake8](https://github.com/PyCQA/flake8) from 7.3.0 to 7.4.1.
+  - [Commits](https://github.com/PyCQA/flake8/compare/7.3.0...7.4.1)
+  ---
+  updated-dependencies:
+  - dependency-name: https://github.com/PyCQA/flake8
+  dependency-version: 7.4.1
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+  ...
+* Bump https://github.com/igorshubovych/markdownlint-cli from v0.44.0 to 0.49.1 (`#48 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/48>`_)
+  * Bump https://github.com/igorshubovych/markdownlint-cli
+  Bumps [https://github.com/igorshubovych/markdownlint-cli](https://github.com/igorshubovych/markdownlint-cli) from v0.44.0 to 0.49.1.
+  - [Release notes](https://github.com/igorshubovych/markdownlint-cli/releases)
+  - [Commits](https://github.com/igorshubovych/markdownlint-cli/compare/v0.44.0...v0.49.1)
+  ---
+  updated-dependencies:
+  - dependency-name: https://github.com/igorshubovych/markdownlint-cli
+  dependency-version: 0.49.1
+  dependency-type: direct:production
+  ...
+  * Fixed linting for this PR.
+  ---------
+  Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+  Co-authored-by: Tony Baltovski <tbaltovski@clearpathrobotics.com>
+* Bump https://github.com/pre-commit/pre-commit-hooks from v5.0.0 to 6.0.0
+  Bumps [https://github.com/pre-commit/pre-commit-hooks](https://github.com/pre-commit/pre-commit-hooks) from v5.0.0 to 6.0.0.
+  - [Release notes](https://github.com/pre-commit/pre-commit-hooks/releases)
+  - [Changelog](https://github.com/pre-commit/pre-commit-hooks/blob/main/CHANGELOG.md)
+  - [Commits](https://github.com/pre-commit/pre-commit-hooks/compare/v5.0.0...v6.0.0)
+  ---
+  updated-dependencies:
+  - dependency-name: https://github.com/pre-commit/pre-commit-hooks
+  dependency-version: 6.0.0
+  dependency-type: direct:production
+  ...
+* Bump actions/github-script from 7 to 9
+  Bumps [actions/github-script](https://github.com/actions/github-script) from 7 to 9.
+  - [Release notes](https://github.com/actions/github-script/releases)
+  - [Commits](https://github.com/actions/github-script/compare/v7...v9)
+  ---
+  updated-dependencies:
+  - dependency-name: actions/github-script
+  dependency-version: '9'
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+  ...
+* Bump https://github.com/PyCQA/flake8 from 7.1.2 to 7.3.0
+  Bumps [https://github.com/PyCQA/flake8](https://github.com/PyCQA/flake8) from 7.1.2 to 7.3.0.
+  - [Commits](https://github.com/PyCQA/flake8/compare/7.1.2...7.3.0)
+  ---
+  updated-dependencies:
+  - dependency-name: https://github.com/PyCQA/flake8
+  dependency-version: 7.3.0
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+  ...
+* Added Github PR templates, precommit and contributing notes.  Also, u… (`#44 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/44>`_)
+  * Added Github PR templates, precommit and contributing notes.  Also, updated CI, updated issue templates and README.
+  * Added dependabot.
+  * Fixed invalid mergify param.
+* Contributors: Tony Baltovski, dependabot[bot]
+
 2.8.1 (2026-07-16)
 ------------------
 * Tuned slam_toolbox defaults: increase throttling, map update interval, and minimum travel thresholds. (`#42 <https://github.com/clearpathrobotics/clearpath_nav2_demos/issues/42>`_)
